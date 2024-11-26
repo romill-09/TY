@@ -1,0 +1,19 @@
+{
+  "students": [
+    {
+      "id": "1",
+      "name": "Romil Lodaya",
+      "age": "19"
+    },
+    {
+      "id": "2",
+      "name": "Siddhi Somaiya",
+      "age": "21"
+    },
+    {
+      "id": "c3b5",
+      "name": "Arya Madhani",
+      "age": "20"
+    }
+  ]
+}

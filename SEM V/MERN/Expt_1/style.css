@@ -1,0 +1,10 @@
+.array, .date, .string, .browser {
+   display: flex;
+   flex-direction: column;
+   gap: 5px;
+}
+
+.array button, .date button, .string button, .browser button {
+   max-width: 150px;
+   border-radius: 100px;
+}

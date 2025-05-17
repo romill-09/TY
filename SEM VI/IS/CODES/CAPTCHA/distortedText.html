@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Distorted Text CAPTCHA</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: url("https://via.placeholder.com/800x600") no-repeat center
+          center fixed;
+        background-size: cover;
+        color: #fff;
+        padding: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      h2 {
+        color: #000;
+        margin-bottom: 20px;
+      }
+
+      .captcha-container {
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 30px 40px;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        width: 400px;
+        text-align: center;
+      }
+
+      canvas {
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      input,
+      button {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      input:focus,
+      button:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+      }
+
+      button {
+        background-color: #007bff;
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      #result {
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 15px;
+      }
+
+      #result.correct {
+        color: green;
+      }
+
+      #result.incorrect {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Distorted Text CAPTCHA</h2>
+
+    <div class="captcha-container">
+      <canvas id="captchaCanvas" width="300" height="100"></canvas>
+      <br />
+      <input type="text" id="captchaInput" placeholder="Enter CAPTCHA text" />
+      <button id="submitCaptcha">Submit</button>
+      <button id="refreshCaptcha">Refresh CAPTCHA</button>
+      <p id="result"></p>
+    </div>
+
+    <script>
+      function generateCaptchaText() {
+        const chars =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let captcha = "";
+        for (let i = 0; i < 6; i++) {
+          captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return captcha;
+      }
+
+      function fillCanvasBackground(ctx, canvas) {
+        const gradient = ctx.createLinearGradient(
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+        gradient.addColorStop(0, "#800080");
+        gradient.addColorStop(0.5, "#4B0082");
+        gradient.addColorStop(1, "#9370DB");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < 100; i++) {
+          const radius = Math.random() * 12 + 3;
+          ctx.fillStyle = `rgba(${Math.random() * 255}, ${
+            Math.random() * 255
+          }, ${Math.random() * 255}, 0.2)`;
+          ctx.beginPath();
+          ctx.arc(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height,
+            radius,
+            0,
+            2 * Math.PI
+          );
+          ctx.fill();
+        }
+
+        for (let i = 0; i < 10; i++) {
+          ctx.strokeStyle = `rgba(0,0,0,${Math.random() * 0.2})`;
+          ctx.beginPath();
+          ctx.moveTo(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height
+          );
+          ctx.lineTo(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height
+          );
+          ctx.stroke();
+        }
+      }
+
+      function drawDistortedText() {
+        const captchaText = generateCaptchaText();
+        const canvas = document.getElementById("captchaCanvas");
+        const ctx = canvas.getContext("2d");
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        fillCanvasBackground(ctx, canvas);
+
+        ctx.font = "bold 40px Arial";
+        ctx.textBaseline = "middle";
+
+        for (let i = 0; i < captchaText.length; i++) {
+          const x = 30 + i * 40;
+          const y = canvas.height / 2 + (Math.random() - 0.5) * 10;
+          const angle = (Math.random() - 0.5) * 0.6;
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(angle);
+          ctx.fillStyle = `rgba(0, 0, 0, ${Math.random() * 0.8 + 0.2})`;
+          ctx.fillText(captchaText[i], 0, 0);
+          ctx.restore();
+        }
+
+        for (let i = 0; i < 5; i++) {
+          ctx.strokeStyle = `rgba(0,0,0,${Math.random() * 0.3})`;
+          ctx.beginPath();
+          ctx.moveTo(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height
+          );
+          ctx.lineTo(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height
+          );
+          ctx.stroke();
+        }
+
+        document.getElementById("captchaInput").dataset.answer = captchaText;
+      }
+
+      drawDistortedText();
+
+      function verifyCaptcha() {
+        const userInput = document.getElementById("captchaInput").value;
+        const correctAnswer =
+          document.getElementById("captchaInput").dataset.answer;
+        const resultElem = document.getElementById("result");
+
+        if (userInput === correctAnswer) {
+          resultElem.textContent = "CAPTCHA verified successfully!";
+          resultElem.classList.add("correct");
+          resultElem.classList.remove("incorrect");
+        } else {
+          resultElem.textContent = "Incorrect answer. Please try again.";
+          resultElem.classList.add("incorrect");
+          resultElem.classList.remove("correct");
+        }
+      }
+
+      document
+        .getElementById("refreshCaptcha")
+        .addEventListener("click", function () {
+          drawDistortedText();
+          document.getElementById("result").textContent = "";
+          document.getElementById("captchaInput").value = "";
+        });
+
+      document
+        .getElementById("submitCaptcha")
+        .addEventListener("click", function () {
+          verifyCaptcha();
+        });
+
+      drawCaptchaText();
+    </script>
+  </body>
+</html>
